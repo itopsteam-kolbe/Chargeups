@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>iPad Charging Request Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 20px;
+    }
+    .form-container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .thank-you {
+      display: none;
+      text-align: center;
+      font-size: 20px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>Device Charge Request</h2>
+    <form id="chargingForm">
+      <div class="form-group">
+        <label for="name">Your First and Last Names</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+
+      <div class="form-group">
+        <label for="year">Year Group</label>
+        <select id="year" name="year" required>
+          <option value="">Select Year</option>
+          <option value="Year 7">Year 7</option>
+          <option value="Year 8">Year 8</option>
+          <option value="Year 9">Year 9</option>
+          <option value="Year 10">Year 10</option>
+          <option value="Year 11">Year 11</option>
+          <option value="Year 12">Year 12</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="reason">Why couldn't the device be charged at home?</label>
+        <textarea id="reason" name="reason" rows="3" required></textarea>
+      </div>
+
+      <button type="submit">Submit</button>
+    </form>
+    <div class="thank-you" id="thankYouMessage">
+      Thank you! Your request has been recorded.
+    </div>
+  </div>
+
+ <script>
+  const form = document.getElementById('chargingForm');
+  const thankYou = document.getElementById('thankYouMessage');
+  const submitButton = form.querySelector('button');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    submitButton.disabled = true;
+    submitButton.textContent = 'Submitting...';
+
+    const data = new FormData(form);
+    data.append('timestamp', new Date().toISOString());
+
+    fetch('https://script.google.com/macros/s/AKfycbxu60Pe40Zu0dAlj1Pyzm6nvgrBZL_mnMH2TtZ735vU7Mdn1o5765bLqWelwCRFJ_717A/exec', {
+      method: 'POST',
+      body: data
+    })
+    .then(async response => {
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`HTTP ${response.status}: ${text}`);
+      }
+      return response.json();
+    })
+    .then(result => {
+      console.log('Success:', result);
+      form.reset();
+      form.style.display = 'none';
+      thankYou.innerText = "Thank you! Your request has been recorded.";
+      thankYou.style.display = 'block';
+
+      setTimeout(() => {
+        thankYou.style.display = 'none';
+        form.style.display = 'block';
+        submitButton.disabled = false;
+        submitButton.textContent = 'Submit';
+      }, 3000);
+    })
+    .catch(error => {
+      console.error('Submission error:', error);
+      thankYou.innerText = "Something went wrong. Please try again.";
+      thankYou.style.display = 'block';
+      form.style.display = 'none';
+      submitButton.disabled = false;
+      submitButton.textContent = 'Submit';
+    });
+  });
+</script>
+
+
+</body>
+</html>
